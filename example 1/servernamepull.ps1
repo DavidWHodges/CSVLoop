@@ -30,7 +30,19 @@ if(!$outputfile)
 if(!(Test-Path $outputfile))
 {
     Log-Info -output "outputfile does not exist. creating with headers."
-    $headers = "servername,IP"
+    $headers = "input,result,servername,IP"
     Set-Content -Path $outputfile -Value $headers
 }
+$resultStatus = "Success"
+$resultInput = $servername
+$hostEntry = [System.Net.Dns]::GetHostByName($serverName)
+$resultIp= $hostEntry.AddressList[0].IPAddressToString
+$resultServerName = ([System.Net.Dns]::GetHostByAddress($resultIp)).Hostname
+if($? -eq $False){
+    $resultServerName="Cannot resolve hostname"
+    $resultStatus = "Failure"
+}
+$output = "$resultInput,$ResultStatus,$resultServerName,$resultIp"
+Add-Content -Path $outputfile -Value $output
+
 return $true
